@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="asmaa.controller.LoginController"
+            stylesheets="@../css/styles.css"
+            prefWidth="1200" prefHeight="800">
+
+    <center>
+        <VBox alignment="CENTER" spacing="30" style="-fx-padding: 40;">
+            <!-- Logo et titre -->
+            <VBox alignment="CENTER" spacing="15">
+                <Label text="ASMAA-Club" styleClass="main-title"/>
+                <Label text="Connexion à votre compte" styleClass="subtitle"/>
+            </VBox>
+
+            <!-- Formulaire de connexion -->
+            <VBox spacing="20" styleClass="form-container" maxWidth="450">
+                <VBox spacing="10">
+                    <Label text="Nom d'utilisateur" styleClass="form-label"/>
+                    <TextField fx:id="txtUsername" promptText="Entrez votre nom d'utilisateur"/>
+                </VBox>
+
+                <VBox spacing="10">
+                    <Label text="Mot de passe" styleClass="form-label"/>
+                    <PasswordField fx:id="txtPassword" promptText="Entrez votre mot de passe"/>
+                </VBox>
+
+                <HBox alignment="CENTER_LEFT">
+                    <CheckBox fx:id="chkRememberMe" text="Se souvenir de moi"/>
+                </HBox>
+
+                <Label fx:id="lblError" styleClass="error-label" visible="false" wrapText="true"/>
+
+                <HBox spacing="15" alignment="CENTER">
+                    <Button fx:id="btnLogin" text="Se connecter"
+                            styleClass="button-success" onAction="#handleLogin"
+                            maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+                <Separator/>
+
+                <VBox alignment="CENTER" spacing="10">
+                    <Label text="Pas encore de compte ?"/>
+                    <Button fx:id="btnRegister" text="Créer un compte"
+                            styleClass="button-secondary" onAction="#handleRegister"/>
+                </VBox>
+
+                <HBox alignment="CENTER">
+                    <Button text="← Retour à l'accueil" onAction="#handleBack"
+                            style="-fx-background-color: transparent; -fx-text-fill: #2a5298;"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="asmaa.controller.SportsController"
+            stylesheets="@../css/styles.css"
+            prefWidth="1200" prefHeight="800">
+
+    <top>
+        <VBox styleClass="header" spacing="20" style="-fx-padding: 20;">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Button text="← Retour" onAction="#handleBack"
+                        style="-fx-background-color: white; -fx-text-fill: #2a5298;"/>
+                <Label fx:id="lblSportNom" styleClass="title-logo"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="30" style="-fx-padding: 40;">
+            <!-- Sélection de la ville -->
+            <VBox spacing="10" styleClass="card">
+                <Label text="1. Choisissez une ville" styleClass="card-title"/>
+                <ComboBox fx:id="cmbVille" promptText="Sélectionnez une ville"
+                          maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Sélection du centre -->
+            <VBox spacing="10" styleClass="card">
+                <Label text="2. Choisissez un centre sportif" styleClass="card-title"/>
+                <ComboBox fx:id="cmbCentre" promptText="Sélectionnez un centre"
+                          maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Liste des terrains -->
+            <VBox spacing="10" styleClass="card" VBox.vgrow="ALWAYS">
+                <Label text="3. Choisissez un terrain" styleClass="card-title"/>
+                <ListView fx:id="listTerrains" VBox.vgrow="ALWAYS">
+                    <placeholder>
+                        <Label text="Sélectionnez d'abord une ville et un centre"/>
+                    </placeholder>
+                </ListView>
+                <Label fx:id="lblInfo" styleClass="info-label"/>
+            </VBox>
+
+            <!-- Bouton de continuation -->
+            <HBox alignment="CENTER">
+                <Button fx:id="btnContinuer" text="Continuer vers la réservation"
+                        styleClass="button-success" onAction="#handleContinuer"
+                        disable="true" minWidth="300"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

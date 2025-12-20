@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="asmaa.controller.VillesController"
+            stylesheets="@../css/styles.css"
+            prefWidth="1400" prefHeight="900">
+
+    <!-- HEADER -->
+    <top>
+        <VBox styleClass="header-container">
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 15 30; -fx-background-color: #1a237e;">
+                <Button text="← Retour" onAction="#handleBack" styleClass="btn-back"/>
+                <Label text="ASMAA CLUB" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            </HBox>
+
+            <HBox alignment="CENTER" style="-fx-padding: 20; -fx-background-color: #283593;">
+                <Label text="🌆 NOS VILLES"
+                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- CONTENU -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: #f5f5f5;">
+            <VBox spacing="40" style="-fx-padding: 50;">
+
+                <!-- TITRE -->
+                <VBox alignment="CENTER" spacing="15">
+                    <Label text="Découvrez nos centres dans 5 grandes villes du Maroc"
+                           style="-fx-font-size: 20px; -fx-text-fill: #666;"/>
+                </VBox>
+
+                <!-- GRILLE DES VILLES -->
+                <GridPane hgap="30" vgap="30" alignment="CENTER">
+
+                    <!-- CASABLANCA -->
+                    <VBox alignment="TOP_CENTER" spacing="20" styleClass="ville-card"
+                          onMouseClicked="#handleCasablanca"
+                          GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <StackPane>
+                            <ImageView fitWidth="400" fitHeight="300" preserveRatio="false">
+                                <image><Image url="@../images/casablanca.jpg"/></image>
+                            </ImageView>
+                            <Label text="🏙️" style="-fx-font-size: 80px;"/>
+                        </StackPane>
+
+                        <VBox spacing="10" alignment="CENTER" style="-fx-padding: 0 20 20 20;">
+                            <Label text="CASABLANCA"
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                            <Label text="La capitale économique"
+                                   style="-fx-font-size: 16px; -fx-text-fill: #666;"/>
+
+                            <Separator style="-fx-padding: 10 0;"/>
+
+                            <HBox spacing="30" alignment="CENTER">
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="5" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Centres" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="25+" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Terrains" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                            </HBox>
+
+                            <VBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                                <Label text="• ASMAA Maarif - Bd Zerktouni" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Anfa - Quartier Anfa" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Ain Diab - Corniche" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Sidi Maarouf" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Hay Hassani" style="-fx-font-size: 13px;"/>
+                            </VBox>
+
+                            <Button text="Voir les centres →" styleClass="btn-ville" onAction="#handleCasablanca"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- RABAT -->
+                    <VBox alignment="TOP_CENTER" spacing="20" styleClass="ville-card"
+                          onMouseClicked="#handleRabat"
+                          GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <StackPane>
+                            <ImageView fitWidth="400" fitHeight="300" preserveRatio="false">
+                                <image><Image url="@../images/rabat.jpg"/></image>
+                            </ImageView>
+                            <Label text="🏛️" style="-fx-font-size: 80px;"/>
+                        </StackPane>
+
+                        <VBox spacing="10" alignment="CENTER" style="-fx-padding: 0 20 20 20;">
+                            <Label text="RABAT"
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                            <Label text="La capitale administrative"
+                                   style="-fx-font-size: 16px; -fx-text-fill: #666;"/>
+
+                            <Separator style="-fx-padding: 10 0;"/>
+
+                            <HBox spacing="30" alignment="CENTER">
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="3" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Centres" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="15+" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Terrains" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                            </HBox>
+
+                            <VBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                                <Label text="• ASMAA Agdal - Av Hassan II" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Hay Riad" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Souissi" style="-fx-font-size: 13px;"/>
+                            </VBox>
+
+                            <Button text="Voir les centres →" styleClass="btn-ville" onAction="#handleRabat"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- MARRAKECH -->
+                    <VBox alignment="TOP_CENTER" spacing="20" styleClass="ville-card"
+                          onMouseClicked="#handleMarrakech"
+                          GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <StackPane>
+                            <ImageView fitWidth="400" fitHeight="300" preserveRatio="false">
+                                <image><Image url="@../images/marrakech.jpg"/></image>
+                            </ImageView>
+                            <Label text="🕌" style="-fx-font-size: 80px;"/>
+                        </StackPane>
+
+                        <VBox spacing="10" alignment="CENTER" style="-fx-padding: 0 20 20 20;">
+                            <Label text="MARRAKECH"
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                            <Label text="La perle du Sud"
+                                   style="-fx-font-size: 16px; -fx-text-fill: #666;"/>
+
+                            <Separator style="-fx-padding: 10 0;"/>
+
+                            <HBox spacing="30" alignment="CENTER">
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="3" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Centres" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="18+" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Terrains" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                            </HBox>
+
+                            <VBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                                <Label text="• ASMAA Guéliz - Av Mohammed V" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Hivernage" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Targa" style="-fx-font-size: 13px;"/>
+                            </VBox>
+
+                            <Button text="Voir les centres →" styleClass="btn-ville" onAction="#handleMarrakech"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- TANGER -->
+                    <VBox alignment="TOP_CENTER" spacing="20" styleClass="ville-card"
+                          onMouseClicked="#handleTanger"
+                          GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <StackPane>
+                            <ImageView fitWidth="400" fitHeight="300" preserveRatio="false">
+                                <image><Image url="@../images/tanger.jpg"/></image>
+                            </ImageView>
+                            <Label text="⛵" style="-fx-font-size: 80px;"/>
+                        </StackPane>
+
+                        <VBox spacing="10" alignment="CENTER" style="-fx-padding: 0 20 20 20;">
+                            <Label text="TANGER"
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                            <Label text="La porte de l'Afrique"
+                                   style="-fx-font-size: 16px; -fx-text-fill: #666;"/>
+
+                            <Separator style="-fx-padding: 10 0;"/>
+
+                            <HBox spacing="30" alignment="CENTER">
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="2" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Centres" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="12+" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Terrains" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                            </HBox>
+
+                            <VBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                                <Label text="• ASMAA Centre - Bd Pasteur" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Malabata" style="-fx-font-size: 13px;"/>
+                            </VBox>
+
+                            <Button text="Voir les centres →" styleClass="btn-ville" onAction="#handleTanger"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- AGADIR -->
+                    <VBox alignment="TOP_CENTER" spacing="20" styleClass="ville-card"
+                          onMouseClicked="#handleAgadir"
+                          GridPane.columnIndex="0" GridPane.rowIndex="2"
+                          GridPane.columnSpan="2" GridPane.halignment="CENTER">
+                        <StackPane>
+                            <ImageView fitWidth="400" fitHeight="300" preserveRatio="false">
+                                <image><Image url="@../images/agadir.jpg"/></image>
+                            </ImageView>
+                            <Label text="🏖️" style="-fx-font-size: 80px;"/>
+                        </StackPane>
+
+                        <VBox spacing="10" alignment="CENTER" style="-fx-padding: 0 20 20 20;">
+                            <Label text="AGADIR"
+                                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                            <Label text="La station balnéaire"
+                                   style="-fx-font-size: 16px; -fx-text-fill: #666;"/>
+
+                            <Separator style="-fx-padding: 10 0;"/>
+
+                            <HBox spacing="30" alignment="CENTER">
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="2" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Centres" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                                <VBox alignment="CENTER" spacing="5">
+                                    <Label text="10+" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff6f00;"/>
+                                    <Label text="Terrains" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+                                </VBox>
+                            </HBox>
+
+                            <VBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                                <Label text="• ASMAA Talborjt" style="-fx-font-size: 13px;"/>
+                                <Label text="• ASMAA Founty" style="-fx-font-size: 13px;"/>
+                            </VBox>
+
+                            <Button text="Voir les centres →" styleClass="btn-ville" onAction="#handleAgadir"/>
+                        </VBox>
+                    </VBox>
+
+                </GridPane>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

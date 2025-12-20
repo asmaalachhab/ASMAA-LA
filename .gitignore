@@ -1,0 +1,12 @@
+/out/
+/.idea/
+*.iml
+*.class
+*.log
+
+# JavaFX
+/lib/javafx-sdk-17/
+
+# OS
+.DS_Store
+Thumbs.db

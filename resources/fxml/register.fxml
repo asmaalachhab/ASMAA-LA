@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+        <?import javafx.scene.layout.*?>
+        <?import javafx.scene.control.*?>
+        <?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="asmaa.controller.RegisterController"
+            stylesheets="@../css/styles.css"
+            prefWidth="1200" prefHeight="800">
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox alignment="CENTER" spacing="30" style="-fx-padding: 40;">
+                <!-- Logo et titre -->
+                <VBox alignment="CENTER" spacing="15">
+                    <Label text="ASMAA-Club" styleClass="main-title"/>
+                    <Label text="Créer votre compte" styleClass="subtitle"/>
+                </VBox>
+
+                <!-- Formulaire d'inscription -->
+                <VBox spacing="20" styleClass="form-container" maxWidth="600">
+                    <GridPane hgap="15" vgap="15">
+                        <!-- Ligne 1 -->
+                        <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="Nom *" styleClass="form-label"/>
+                            <TextField fx:id="txtNom" promptText="Nom de famille"/>
+                        </VBox>
+
+                        <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Prénom *" styleClass="form-label"/>
+                            <TextField fx:id="txtPrenom" promptText="Prénom"/>
+                        </VBox>
+
+                        <!-- Ligne 2 -->
+                        <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                              GridPane.columnSpan="2">
+                            <Label text="Nom d'utilisateur *" styleClass="form-label"/>
+                            <TextField fx:id="txtUsername"
+                                       promptText="3-20 caractères alphanumériques"/>
+                        </VBox>
+
+                        <!-- Ligne 3 -->
+                        <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                              GridPane.columnSpan="2">
+                            <Label text="Email *" styleClass="form-label"/>
+                            <TextField fx:id="txtEmail"
+                                       promptText="exemple@email.com"/>
+                        </VBox>
+
+                        <!-- Ligne 4 -->
+                        <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="3"
+                              GridPane.columnSpan="2">
+                            <Label text="Téléphone" styleClass="form-label"/>
+                            <TextField fx:id="txtTelephone"
+                                       promptText="0600000000"/>
+                        </VBox>
+
+                        <!-- Ligne 5 -->
+                        <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                            <Label text="Mot de passe *" styleClass="form-label"/>
+                            <PasswordField fx:id="txtPassword"
+                                           promptText="Minimum 6 caractères"/>
+                        </VBox>
+
+                        <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                            <Label text="Confirmer *" styleClass="form-label"/>
+                            <PasswordField fx:id="txtConfirmPassword"
+                                           promptText="Retapez le mot de passe"/>
+                        </VBox>
+                    </GridPane>
+
+                    <Label text="* Champs obligatoires"
+                           style="-fx-text-fill: #999; -fx-font-size: 12px;"/>
+
+                    <Label fx:id="lblError" styleClass="error-label"
+                           visible="false" wrapText="true"/>
+                    <Label fx:id="lblSuccess" styleClass="success-label"
+                           visible="false" wrapText="true"/>
+
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button fx:id="btnRegister" text="S'inscrire"
+                                styleClass="button-success" onAction="#handleRegister"
+                                maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <VBox alignment="CENTER" spacing="10">
+                        <Label text="Vous avez déjà un compte ?"/>
+                        <Button fx:id="btnLogin" text="Se connecter"
+                                styleClass="button-secondary" onAction="#handleLogin"/>
+                    </VBox>
+
+                    <HBox alignment="CENTER">
+                        <Button text="← Retour à l'accueil" onAction="#handleBack"
+                                style="-fx-background-color: transparent; -fx-text-fill: #2a5298;"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

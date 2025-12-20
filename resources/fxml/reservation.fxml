@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="asmaa.controller.ReservationController"
+            stylesheets="@../css/styles.css"
+            prefWidth="1200" prefHeight="800">
+
+    <top>
+        <VBox styleClass="header" spacing="20" style="-fx-padding: 20;">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Button text="← Retour" onAction="#handleBack"
+                        style="-fx-background-color: white; -fx-text-fill: #2a5298;"/>
+                <Label text="Réservation" styleClass="title-logo"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <VBox spacing="30" style="-fx-padding: 40;">
+                <!-- Informations du terrain -->
+                <VBox spacing="10" styleClass="card">
+                    <Label text="Terrain sélectionné" styleClass="card-title"/>
+                    <Label fx:id="lblTerrainInfo" styleClass="card-content" wrapText="true"/>
+                </VBox>
+
+                <!-- Sélection de la date et heure -->
+                <VBox spacing="20" styleClass="card">
+                    <Label text="Date et Heure" styleClass="card-title"/>
+
+                    <VBox spacing="10">
+                        <Label text="Date de réservation" styleClass="form-label"/>
+                        <DatePicker fx:id="datePicker" promptText="Choisissez une date"
+                                    maxWidth="Infinity"/>
+                    </VBox>
+
+                    <HBox spacing="20">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Heure de début" styleClass="form-label"/>
+                            <ComboBox fx:id="cmbHeureDebut" promptText="08:00"
+                                      maxWidth="Infinity"/>
+                        </VBox>
+
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Heure de fin" styleClass="form-label"/>
+                            <ComboBox fx:id="cmbHeureFin" promptText="09:00"
+                                      maxWidth="Infinity"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox alignment="CENTER">
+                        <Button fx:id="btnVerifier" text="Vérifier la disponibilité"
+                                styleClass="button-secondary" onAction="#handleVerifier"
+                                minWidth="250"/>
+                    </HBox>
+
+                    <Label fx:id="lblStatus" wrapText="true"/>
+                </VBox>
+
+                <!-- Récapitulatif et prix -->
+                <VBox spacing="15" styleClass="card">
+                    <Label text="Récapitulatif" styleClass="card-title"/>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label fx:id="lblPrix" text="Prix: 0.00 DH"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label fx:id="lblRemise" text="Remise: 0.00 DH"
+                               style="-fx-font-size: 14px; -fx-text-fill: green;"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label fx:id="lblPrixFinal" text="Total: 0.00 DH"
+                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2a5298;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Conditions et confirmation -->
+                <VBox spacing="15" styleClass="card">
+                    <CheckBox fx:id="chkAccepterConditions" wrapText="true"
+                              onAction="#handleAccepterConditions"
+                              text="J'accepte les conditions générales de réservation et de paiement"/>
+
+                    <HBox alignment="CENTER">
+                        <Button fx:id="btnReserver" text="Confirmer la réservation"
+                                styleClass="button-success" onAction="#handleReserver"
+                                disable="true" minWidth="300" minHeight="45"
+                                style="-fx-font-size: 16px;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Note -->
+                <VBox alignment="CENTER" spacing="5" style="-fx-padding: 20;">
+                    <Label text="💡 Conseil" style="-fx-font-weight: bold;"/>
+                    <Label text="Les réservations doivent être effectuées au moins 2 heures à l'avance."
+                           wrapText="true" style="-fx-text-alignment: center;"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
