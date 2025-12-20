@@ -10,3 +10,13 @@
 # OS
 .DS_Store
 Thumbs.db
+
+
+
+/out/
+/target/
+*.class
+*.log
+.idea/
+.vscode/
+*.iml
