@@ -95,53 +95,83 @@ public class AdminController {
     private void setupTables() {
 
         // ----- CENTRES -----
-        colCentreNom.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getNom()));
+        colCentreNom.setCellValueFactory(d -> {
+            Centre c = d.getValue();
+            return new SimpleStringProperty(c != null && c.getNom() != null ? c.getNom() : "");
+        });
 
-        colCentreVille.setCellValueFactory(d ->
-                new SimpleStringProperty("Ville ID : " + d.getValue().getVilleId()));
+        colCentreVille.setCellValueFactory(d -> {
+            Centre c = d.getValue();
+            return new SimpleStringProperty(c != null ? "Ville ID : " + c.getVilleId() : "");
+        });
 
-        colCentreAdresse.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getAdresse()));
+        colCentreAdresse.setCellValueFactory(d -> {
+            Centre c = d.getValue();
+            return new SimpleStringProperty(c != null && c.getAdresse() != null ? c.getAdresse() : "");
+        });
 
-        colCentreStatut.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().isActif() ? "✅ Actif" : "❌ Inactif"));
+        colCentreStatut.setCellValueFactory(d -> {
+            Centre c = d.getValue();
+            return new SimpleStringProperty(c != null && c.isActif() ? "✅ Actif" : "❌ Inactif");
+        });
 
         tableCentres.setItems(centres);
 
         // ----- TERRAINS -----
-        colTerrainNom.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getNom()));
+        colTerrainNom.setCellValueFactory(d -> {
+            Terrain t = d.getValue();
+            return new SimpleStringProperty(t != null && t.getNom() != null ? t.getNom() : "");
+        });
 
-        colTerrainCentre.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getCentreNom()));
+        colTerrainCentre.setCellValueFactory(d -> {
+            Terrain t = d.getValue();
+            return new SimpleStringProperty(t != null && t.getCentreNom() != null ? t.getCentreNom() : "");
+        });
 
-        colTerrainSport.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getSportNom()));
+        colTerrainSport.setCellValueFactory(d -> {
+            Terrain t = d.getValue();
+            return new SimpleStringProperty(t != null && t.getSportNom() != null ? t.getSportNom() : "");
+        });
 
-        colTerrainPrix.setCellValueFactory(d ->
-                new SimpleObjectProperty<>(d.getValue().getPrixHeure()));
+        colTerrainPrix.setCellValueFactory(d -> {
+            Terrain t = d.getValue();
+            return new SimpleObjectProperty<>(t != null ? t.getPrixHeure() : 0.0);
+        });
 
-        colTerrainStatut.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().isActif() ? "✅ Actif" : "❌ Bloqué"));
+        colTerrainStatut.setCellValueFactory(d -> {
+            Terrain t = d.getValue();
+            return new SimpleStringProperty(t != null && t.isActif() ? "✅ Actif" : "❌ Bloqué");
+        });
 
         tableTerrains.setItems(terrains);
 
         // ----- RESERVATIONS -----
-        colResId.setCellValueFactory(d ->
-                new SimpleObjectProperty<>(d.getValue().getId()));
+        colResId.setCellValueFactory(d -> {
+            Reservation r = d.getValue();
+            return new SimpleObjectProperty<>(r != null ? r.getId() : 0);
+        });
 
-        colResClient.setCellValueFactory(d ->
-                new SimpleStringProperty("User #" + d.getValue().getUserId()));
+        colResClient.setCellValueFactory(d -> {
+            Reservation r = d.getValue();
+            return new SimpleStringProperty(r != null ? "User #" + r.getUserId() : "");
+        });
 
-        colResTerrain.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getTerrainNom()));
+        colResTerrain.setCellValueFactory(d -> {
+            Reservation r = d.getValue();
+            return new SimpleStringProperty(r != null && r.getTerrainNom() != null ? r.getTerrainNom() : "");
+        });
 
-        colResDate.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getDateReservation().toString()));
+        colResDate.setCellValueFactory(d -> {
+            Reservation r = d.getValue();
+            return new SimpleStringProperty(r != null && r.getDateReservation() != null 
+                    ? r.getDateReservation().toString() : "");
+        });
 
-        colResStatut.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getStatut().name()));
+        colResStatut.setCellValueFactory(d -> {
+            Reservation r = d.getValue();
+            return new SimpleStringProperty(r != null && r.getStatut() != null 
+                    ? r.getStatut().name() : "");
+        });
 
         tableReservations.setItems(reservations);
     }
@@ -156,28 +186,58 @@ public class AdminController {
 
     private void loadCentres() {
         new Thread(() -> {
-            List<Centre> list = networkClient.getAllCentres();
-            Platform.runLater(() -> {
-                centres.setAll(list);
-            });
+            try {
+                List<Centre> list = networkClient.getAllCentres();
+                Platform.runLater(() -> {
+                    if (list != null) {
+                        centres.setAll(list);
+                    } else {
+                        centres.clear();
+                    }
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    showError("Erreur", "Impossible de charger les centres: " + e.getMessage());
+                });
+            }
         }).start();
     }
 
     private void loadTerrains() {
         new Thread(() -> {
-            List<Terrain> list = networkClient.getAllTerrains();
-            Platform.runLater(() -> {
-                terrains.setAll(list);
-            });
+            try {
+                List<Terrain> list = networkClient.getAllTerrains();
+                Platform.runLater(() -> {
+                    if (list != null) {
+                        terrains.setAll(list);
+                    } else {
+                        terrains.clear();
+                    }
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    showError("Erreur", "Impossible de charger les terrains: " + e.getMessage());
+                });
+            }
         }).start();
     }
 
     private void loadReservations() {
         new Thread(() -> {
-            List<Reservation> list = networkClient.getAllReservations();
-            Platform.runLater(() -> {
-                reservations.setAll(list);
-            });
+            try {
+                List<Reservation> list = networkClient.getAllReservations();
+                Platform.runLater(() -> {
+                    if (list != null) {
+                        reservations.setAll(list);
+                    } else {
+                        reservations.clear();
+                    }
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    showError("Erreur", "Impossible de charger les réservations: " + e.getMessage());
+                });
+            }
         }).start();
     }
 

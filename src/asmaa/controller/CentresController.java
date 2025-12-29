@@ -95,9 +95,12 @@ public class CentresController {
         Centre selectedCentre = listCentres.getSelectionModel().getSelectedItem();
 
         if (selectedCentre != null) {
-            // Passer à la sélection des sports
-            setSelectedSport(selectedCentre.getId(), selectedCentre.getNom());
-            ClientMain.changeScene("sports.fxml");
+            // CORRECTION LOGIQUE: Le flux Villes -> Centres -> Sports nécessite un sport.
+            // Comme on vient de VillesController, on n'a pas de sport sélectionné.
+            // Solution: Rediriger vers la page d'accueil pour sélectionner un sport,
+            // ou créer un nouveau flux. Pour l'instant, on redirige vers home.
+            // TODO: Implémenter un flux complet Villes -> Centres -> Sports -> Terrains
+            ClientMain.changeScene("home.fxml");
         }
     }
 

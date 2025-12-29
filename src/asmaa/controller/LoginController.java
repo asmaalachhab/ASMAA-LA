@@ -7,9 +7,6 @@ import asmaa.model.User;
 import asmaa.utils.SessionManager;
 import asmaa.utils.ValidationUtil;
 import javafx.fxml.FXML;
-
-
-import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;

@@ -3,7 +3,6 @@ package asmaa.controller;
 import asmaa.client.ClientMain;
 import asmaa.client.NetworkClient;
 import asmaa.model.*;
-import asmaa.server.DatabaseManager;
 import asmaa.utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -97,14 +96,16 @@ public class ReservationController {
     // ==================== LOADERS ====================
     private void loadVilles() {
         new Thread(() -> {
-            List<Ville> list = DatabaseManager.getAllVilles();
+            // Utiliser NetworkClient au lieu de DatabaseManager directement
+            List<Ville> list = networkClient.getVilles();
             javafx.application.Platform.runLater(() -> villes.addAll(list));
         }).start();
     }
 
     private void loadSports() {
         new Thread(() -> {
-            List<Sport> list = DatabaseManager.getAllSports();
+            // Utiliser NetworkClient au lieu de DatabaseManager directement
+            List<Sport> list = networkClient.getSports();
             javafx.application.Platform.runLater(() -> sports.addAll(list));
         }).start();
     }
@@ -133,7 +134,11 @@ public class ReservationController {
                     cmbSport.getValue().getId(),
                     cmbCentre.getValue().getId()
             );
-            javafx.application.Platform.runLater(() -> terrains.addAll(list));
+            javafx.application.Platform.runLater(() -> {
+                if (list != null) {
+                    terrains.addAll(list);
+                }
+            });
         }).start();
     }
 
@@ -142,24 +147,39 @@ public class ReservationController {
     private void handleVerifier() {
         if (!validateSelection()) return;
 
-        disponible = networkClient.checkDisponibilite(
-                selectedTerrain.getId(),
-                datePicker.getValue(),
-                LocalTime.parse(cmbHeureDebut.getValue()),
-                LocalTime.parse(cmbHeureFin.getValue())
-        );
+        if (selectedTerrain == null) {
+            showError("Veuillez sélectionner un terrain");
+            return;
+        }
 
-        if (disponible) {
-            showSuccess("Terrain disponible ✅");
-            btnReserver.setDisable(false);
-        } else {
-            showError("Terrain non disponible ❌");
+        try {
+            disponible = networkClient.checkDisponibilite(
+                    selectedTerrain.getId(),
+                    datePicker.getValue(),
+                    LocalTime.parse(cmbHeureDebut.getValue()),
+                    LocalTime.parse(cmbHeureFin.getValue())
+            );
+
+            if (disponible) {
+                showSuccess("Terrain disponible ✅");
+                btnReserver.setDisable(false);
+            } else {
+                showError("Terrain non disponible ❌");
+                btnReserver.setDisable(true);
+            }
+        } catch (Exception e) {
+            showError("Erreur lors de la vérification: " + e.getMessage());
             btnReserver.setDisable(true);
         }
     }
 
     @FXML
     private void handleReserver() {
+        if (selectedTerrain == null) {
+            showError("Veuillez sélectionner un terrain");
+            return;
+        }
+
         if (!disponible) {
             showError("Veuillez vérifier la disponibilité");
             return;
@@ -167,19 +187,30 @@ public class ReservationController {
 
         if (!sessionManager.isLoggedIn() && !validateInviteForm()) return;
 
-        Reservation reservation = new Reservation();
-        reservation.setTerrainId(selectedTerrain.getId());
-        reservation.setDateReservation(datePicker.getValue());
-        reservation.setHeureDebut(LocalTime.parse(cmbHeureDebut.getValue()));
-        reservation.setHeureFin(LocalTime.parse(cmbHeureFin.getValue()));
-        reservation.setPrixTotal(selectedTerrain.getPrixHeure() * calculateDuration());
+        try {
+            Reservation reservation = new Reservation();
+            reservation.setTerrainId(selectedTerrain.getId());
+            reservation.setDateReservation(datePicker.getValue());
+            reservation.setHeureDebut(LocalTime.parse(cmbHeureDebut.getValue()));
+            reservation.setHeureFin(LocalTime.parse(cmbHeureFin.getValue()));
+            
+            double duration = calculateDuration();
+            if (duration <= 0) {
+                showError("L'heure de fin doit être après l'heure de début");
+                return;
+            }
+            
+            reservation.setPrixTotal(selectedTerrain.getPrixHeure() * duration);
 
-        boolean success = networkClient.createReservation(reservation);
-        if (success) {
-            showSuccess("Réservation confirmée 🎉");
-            ClientMain.changeScene("home.fxml");
-        } else {
-            showError("Erreur lors de la réservation");
+            boolean success = networkClient.createReservation(reservation);
+            if (success) {
+                showSuccess("Réservation confirmée 🎉");
+                ClientMain.changeScene("home.fxml");
+            } else {
+                showError("Erreur lors de la réservation");
+            }
+        } catch (Exception e) {
+            showError("Erreur lors de la réservation: " + e.getMessage());
         }
     }
 
@@ -203,9 +234,12 @@ public class ReservationController {
     }
 
     private double calculateDuration() {
+        if (cmbHeureDebut.getValue() == null || cmbHeureFin.getValue() == null) {
+            return 0.0;
+        }
         LocalTime d = LocalTime.parse(cmbHeureDebut.getValue());
         LocalTime f = LocalTime.parse(cmbHeureFin.getValue());
-        return (f.toSecondOfDay() - d.toSecondOfDay())/3600.0;
+        return (f.toSecondOfDay() - d.toSecondOfDay()) / 3600.0;
     }
 
     private boolean validateSelection() {

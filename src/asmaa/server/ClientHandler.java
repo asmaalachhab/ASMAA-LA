@@ -75,6 +75,9 @@ public class ClientHandler implements Runnable {
             case "GET_CENTRES":
                 handleGetCentres();
                 break;
+            case "GET_VILLES":
+                handleGetVilles();
+                break;
             case "CHECK_DISPONIBILITE":
                 handleCheckDisponibilite();
                 break;
@@ -94,7 +97,23 @@ public class ClientHandler implements Runnable {
                 handleAnnulerReservation();
                 break;
             case "GET_STATISTIQUES":
+            case "ADMIN_STATS":
                 handleGetStatistiques();
+                break;
+            case "ADMIN_GET_CENTRES":
+                handleAdminGetCentres();
+                break;
+            case "ADMIN_GET_TERRAINS":
+                handleAdminGetTerrains();
+                break;
+            case "ADMIN_GET_RESERVATIONS":
+                handleAdminGetReservations();
+                break;
+            case "ADMIN_DELETE_CENTRE":
+                handleAdminDeleteCentre();
+                break;
+            case "ADMIN_BLOQUER_TERRAIN":
+                handleAdminBloquerTerrain();
                 break;
             case "DISCONNECT":
                 connected = false;
@@ -165,6 +184,14 @@ public class ClientHandler implements Runnable {
 
         List<Centre> centres = DatabaseManager.getCentresByVille(villeId);
         sendResponse("SUCCESS", centres);
+    }
+
+    /**
+     * Récupère toutes les villes
+     */
+    private void handleGetVilles() throws IOException {
+        List<Ville> villes = DatabaseManager.getAllVilles();
+        sendResponse("SUCCESS", villes);
     }
 
     /**
@@ -277,6 +304,87 @@ public class ClientHandler implements Runnable {
         // Récupérer les stats depuis la base
         Object stats = DatabaseManager.getStatistiques();
         sendResponse("SUCCESS", stats);
+    }
+
+    /**
+     * Récupère tous les centres (admin uniquement)
+     */
+    private void handleAdminGetCentres() throws IOException {
+        if (currentUser == null || !currentUser.isAdmin()) {
+            sendResponse("ERROR", "Accès non autorisé");
+            return;
+        }
+
+        List<Centre> centres = DatabaseManager.getAllCentres();
+        sendResponse("SUCCESS", centres);
+    }
+
+    /**
+     * Récupère tous les terrains (admin uniquement)
+     */
+    private void handleAdminGetTerrains() throws IOException {
+        if (currentUser == null || !currentUser.isAdmin()) {
+            sendResponse("ERROR", "Accès non autorisé");
+            return;
+        }
+
+        List<Terrain> terrains = DatabaseManager.getAllTerrains();
+        sendResponse("SUCCESS", terrains);
+    }
+
+    /**
+     * Récupère toutes les réservations (admin uniquement)
+     */
+    private void handleAdminGetReservations() throws IOException {
+        if (currentUser == null || !currentUser.isAdmin()) {
+            sendResponse("ERROR", "Accès non autorisé");
+            return;
+        }
+
+        List<Reservation> reservations = DatabaseManager.getAllReservations();
+        sendResponse("SUCCESS", reservations);
+    }
+
+    /**
+     * Supprime un centre (admin uniquement)
+     */
+    private void handleAdminDeleteCentre() throws IOException, ClassNotFoundException {
+        if (currentUser == null || !currentUser.isAdmin()) {
+            sendResponse("ERROR", "Accès non autorisé");
+            return;
+        }
+
+        int centreId = input.readInt();
+        boolean success = DatabaseManager.deleteCentre(centreId);
+
+        if (success) {
+            sendResponse("SUCCESS", true);
+            log("Centre supprimé par admin: " + currentUser.getUsername());
+        } else {
+            sendResponse("ERROR", "Impossible de supprimer le centre");
+        }
+    }
+
+    /**
+     * Bloque un terrain (admin uniquement)
+     */
+    private void handleAdminBloquerTerrain() throws IOException, ClassNotFoundException {
+        if (currentUser == null || !currentUser.isAdmin()) {
+            sendResponse("ERROR", "Accès non autorisé");
+            return;
+        }
+
+        int terrainId = input.readInt();
+        String raison = (String) input.readObject();
+
+        boolean success = DatabaseManager.bloquerTerrain(terrainId, raison);
+
+        if (success) {
+            sendResponse("SUCCESS", true);
+            log("Terrain bloqué par admin: " + currentUser.getUsername() + " - Raison: " + raison);
+        } else {
+            sendResponse("ERROR", "Impossible de bloquer le terrain");
+        }
     }
 
     /**

@@ -39,8 +39,12 @@ public class SportsController {
     public void initialize() {
         networkClient = ClientMain.getNetworkClient();
 
-        // Afficher le sport sélectionné
-        lblSportNom.setText("Réserver un terrain de " + selectedSportNom);
+        // Afficher le sport sélectionné (avec vérification null)
+        if (selectedSportNom != null && !selectedSportNom.isEmpty()) {
+            lblSportNom.setText("Réserver un terrain de " + selectedSportNom);
+        } else {
+            lblSportNom.setText("Sélectionnez un sport");
+        }
 
         // Initialiser les listes
         villes = FXCollections.observableArrayList();
@@ -65,12 +69,35 @@ public class SportsController {
 
     /** Charge les villes disponibles */
     private void loadVilles() {
-        villes.addAll(
-                new Ville() {{ setId(1); setNom("Casablanca"); }},
-                new Ville() {{ setId(2); setNom("Rabat"); }},
-                new Ville() {{ setId(3); setNom("Marrakech"); }},
-                new Ville() {{ setId(4); setNom("Tanger"); }}
-        );
+        // CORRECTION: Utiliser NetworkClient au lieu de données hardcodées
+        new Thread(() -> {
+            try {
+                List<Ville> villesList = networkClient.getVilles();
+                javafx.application.Platform.runLater(() -> {
+                    if (villesList != null && !villesList.isEmpty()) {
+                        villes.setAll(villesList);
+                    } else {
+                        // Fallback si la base de données n'est pas disponible
+                        villes.addAll(
+                                new Ville() {{ setId(1); setNom("Casablanca"); }},
+                                new Ville() {{ setId(2); setNom("Rabat"); }},
+                                new Ville() {{ setId(3); setNom("Marrakech"); }},
+                                new Ville() {{ setId(4); setNom("Tanger"); }}
+                        );
+                    }
+                });
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> {
+                    // Fallback en cas d'erreur
+                    villes.addAll(
+                            new Ville() {{ setId(1); setNom("Casablanca"); }},
+                            new Ville() {{ setId(2); setNom("Rabat"); }},
+                            new Ville() {{ setId(3); setNom("Marrakech"); }},
+                            new Ville() {{ setId(4); setNom("Tanger"); }}
+                    );
+                });
+            }
+        }).start();
     }
 
     /** Gère la sélection d'une ville */
@@ -98,6 +125,12 @@ public class SportsController {
     private void handleCentreSelection() {
         Centre centre = cmbCentre.getValue();
         if (centre == null) return;
+
+        // Vérifier qu'un sport est sélectionné
+        if (selectedSportId <= 0) {
+            showInfo("Veuillez d'abord sélectionner un sport");
+            return;
+        }
 
         terrains.clear();
 

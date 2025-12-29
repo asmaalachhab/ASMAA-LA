@@ -21,37 +21,48 @@ public class DatabaseManager {
     private static final String PASSWORD = "root";  // Modifier selon votre configuration
 
     private static Connection connection;
+    private static final Object connectionLock = new Object();
 
     /**
      * Initialise la connexion à la base de données
      */
     public static void initialize() {
-        try {
-            // Charger le driver MySQL
-            Class.forName("com.mysql.cj.jdbc.Driver");
+        synchronized (connectionLock) {
+            try {
+                // Charger le driver MySQL
+                Class.forName("com.mysql.cj.jdbc.Driver");
 
-            // Créer la connexion
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                // Créer la connexion
+                connection = DriverManager.getConnection(URL, USER, PASSWORD);
 
-            System.out.println("✓ Connexion à la base de données réussie");
+                System.out.println("✓ Connexion à la base de données réussie");
 
-        } catch (ClassNotFoundException e) {
-            System.err.println("✗ Driver MySQL non trouvé: " + e.getMessage());
-            System.exit(1);
-        } catch (SQLException e) {
-            System.err.println("✗ Erreur de connexion à la base de données: " + e.getMessage());
-            System.exit(1);
+            } catch (ClassNotFoundException e) {
+                System.err.println("✗ Driver MySQL non trouvé: " + e.getMessage());
+                System.exit(1);
+            } catch (SQLException e) {
+                System.err.println("✗ Erreur de connexion à la base de données: " + e.getMessage());
+                System.exit(1);
+            }
         }
     }
 
     /**
-     * Obtenir une connexion à la base de données
+     * Obtenir une connexion à la base de données (thread-safe)
+     * Note: Pour une meilleure performance en production, utilisez un pool de connexions (HikariCP)
      */
     public static Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
-            initialize();
+        synchronized (connectionLock) {
+            try {
+                if (connection == null || connection.isClosed()) {
+                    initialize();
+                }
+            } catch (SQLException e) {
+                // Si la connexion est fermée, réinitialiser
+                initialize();
+            }
+            return connection;
         }
-        return connection;
     }
 
     // ==================== GESTION DES UTILISATEURS ====================
@@ -314,10 +325,10 @@ public class DatabaseManager {
             stmt.setTime(3, Time.valueOf(heureDebut));
             stmt.setTime(4, Time.valueOf(heureFin));
 
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt("conflit") == 0;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("conflit") == 0;
+                }
             }
 
         } catch (SQLException e) {
@@ -532,15 +543,202 @@ public class DatabaseManager {
         return false;
     }
 
+    // ==================== GESTION ADMIN ====================
+
+    /**
+     * Récupère tous les centres (admin)
+     */
+    public static List<Centre> getAllCentres() {
+        List<Centre> centres = new ArrayList<>();
+        String sql = "SELECT * FROM centres ORDER BY nom";
+
+        try (Statement stmt = getConnection().createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Centre centre = new Centre();
+                centre.setId(rs.getInt("id"));
+                centre.setNom(rs.getString("nom"));
+                centre.setVilleId(rs.getInt("ville_id"));
+                centre.setAdresse(rs.getString("adresse"));
+                centre.setTelephone(rs.getString("telephone"));
+                centre.setHoraireOuverture(rs.getTime("horaire_ouverture").toLocalTime());
+                centre.setHoraireFermeture(rs.getTime("horaire_fermeture").toLocalTime());
+                centre.setActif(rs.getBoolean("actif"));
+                centres.add(centre);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des centres: " + e.getMessage());
+        }
+
+        return centres;
+    }
+
+    /**
+     * Récupère tous les terrains (admin)
+     */
+    public static List<Terrain> getAllTerrains() {
+        List<Terrain> terrains = new ArrayList<>();
+        String sql = "SELECT t.*, s.nom as sport_nom, c.nom as centre_nom " +
+                "FROM terrains t " +
+                "JOIN sports s ON t.sport_id = s.id " +
+                "JOIN centres c ON t.centre_id = c.id " +
+                "ORDER BY t.nom";
+
+        try (Statement stmt = getConnection().createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Terrain terrain = new Terrain();
+                terrain.setId(rs.getInt("id"));
+                terrain.setNom(rs.getString("nom"));
+                terrain.setCentreId(rs.getInt("centre_id"));
+                terrain.setSportId(rs.getInt("sport_id"));
+                terrain.setTypeSurface(rs.getString("type_surface"));
+                terrain.setCapacite(rs.getInt("capacite"));
+                terrain.setPrixHeure(rs.getDouble("prix_heure"));
+                terrain.setActif(rs.getBoolean("actif"));
+                terrain.setSportNom(rs.getString("sport_nom"));
+                terrain.setCentreNom(rs.getString("centre_nom"));
+                terrains.add(terrain);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des terrains: " + e.getMessage());
+        }
+
+        return terrains;
+    }
+
+    /**
+     * Récupère toutes les réservations (admin)
+     */
+    public static List<Reservation> getAllReservations() {
+        List<Reservation> reservations = new ArrayList<>();
+        String sql = "SELECT r.*, t.nom as terrain_nom, s.nom as sport_nom, c.nom as centre_nom " +
+                "FROM reservations r " +
+                "JOIN terrains t ON r.terrain_id = t.id " +
+                "JOIN sports s ON t.sport_id = s.id " +
+                "JOIN centres c ON t.centre_id = c.id " +
+                "ORDER BY r.date_reservation DESC, r.heure_debut DESC";
+
+        try (Statement stmt = getConnection().createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Reservation reservation = extractReservationFromResultSet(rs);
+                reservations.add(reservation);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des réservations: " + e.getMessage());
+        }
+
+        return reservations;
+    }
+
+    /**
+     * Supprime un centre (admin)
+     */
+    public static boolean deleteCentre(int centreId) {
+        String sql = "UPDATE centres SET actif = FALSE WHERE id = ?";
+
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
+            stmt.setInt(1, centreId);
+            int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la suppression du centre: " + e.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Bloque un terrain (admin)
+     */
+    public static boolean bloquerTerrain(int terrainId, String raison) {
+        String sql = "UPDATE terrains SET actif = FALSE WHERE id = ?";
+
+        try (PreparedStatement stmt = getConnection().prepareStatement(sql)) {
+            stmt.setInt(1, terrainId);
+            int affectedRows = stmt.executeUpdate();
+
+            if (affectedRows > 0) {
+                // Log de la raison (pourrait être stocké dans une table séparée)
+                System.out.println("Terrain #" + terrainId + " bloqué. Raison: " + raison);
+                return true;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur lors du blocage du terrain: " + e.getMessage());
+        }
+
+        return false;
+    }
+
     // ==================== STATISTIQUES (ADMIN) ====================
 
     /**
      * Récupère les statistiques globales
      */
-    public static Object getStatistiques() {
-        // Implémenter selon les besoins
-        // Retourner un objet avec toutes les stats nécessaires
-        return null;
+    public static java.util.Map<String, Object> getStatistiques() {
+        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+
+        try {
+            // Nombre total d'utilisateurs
+            String sqlUsers = "SELECT COUNT(*) as total FROM users WHERE actif = TRUE";
+            try (Statement stmt = getConnection().createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlUsers)) {
+                if (rs.next()) {
+                    stats.put("totalUsers", rs.getInt("total"));
+                }
+            }
+
+            // Nombre total de réservations
+            String sqlReservations = "SELECT COUNT(*) as total FROM reservations";
+            try (Statement stmt = getConnection().createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlReservations)) {
+                if (rs.next()) {
+                    stats.put("totalReservations", rs.getInt("total"));
+                }
+            }
+
+            // Réservations confirmées
+            String sqlConfirmed = "SELECT COUNT(*) as total FROM reservations WHERE statut = 'CONFIRMEE'";
+            try (Statement stmt = getConnection().createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlConfirmed)) {
+                if (rs.next()) {
+                    stats.put("reservationsConfirmees", rs.getInt("total"));
+                }
+            }
+
+            // Revenus totaux
+            String sqlRevenus = "SELECT SUM(prix_total) as total FROM reservations WHERE statut = 'CONFIRMEE'";
+            try (Statement stmt = getConnection().createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlRevenus)) {
+                if (rs.next()) {
+                    double revenus = rs.getDouble("total");
+                    stats.put("revenusTotaux", rs.wasNull() ? 0.0 : revenus);
+                }
+            }
+
+            // Nombre de terrains actifs
+            String sqlTerrains = "SELECT COUNT(*) as total FROM terrains WHERE actif = TRUE";
+            try (Statement stmt = getConnection().createStatement();
+                 ResultSet rs = stmt.executeQuery(sqlTerrains)) {
+                if (rs.next()) {
+                    stats.put("terrainsActifs", rs.getInt("total"));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des statistiques: " + e.getMessage());
+        }
+
+        return stats;
     }
 
     /**

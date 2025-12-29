@@ -26,12 +26,19 @@ public class NetworkClient {
     public boolean connect() {
         try {
             socket = new Socket(SERVER_HOST, SERVER_PORT);
+            socket.setSoTimeout(30000); // Timeout de 30 secondes
             output = new ObjectOutputStream(socket.getOutputStream());
             output.flush();
             input = new ObjectInputStream(socket.getInputStream());
             connected = true;
             System.out.println("✓ Connecté au serveur");
             return true;
+        } catch (java.net.ConnectException e) {
+            System.err.println("✗ Impossible de se connecter au serveur. Vérifiez que le serveur est démarré.");
+            return false;
+        } catch (java.net.SocketTimeoutException e) {
+            System.err.println("✗ Timeout de connexion au serveur");
+            return false;
         } catch (IOException e) {
             System.err.println("✗ Erreur de connexion au serveur: " + e.getMessage());
             return false;
@@ -40,33 +47,66 @@ public class NetworkClient {
 
     public void disconnect() {
         try {
-            if (connected) {
-                sendCommand("DISCONNECT");
-                if (input != null) input.close();
-                if (output != null) output.close();
-                if (socket != null) socket.close();
-                connected = false;
-                System.out.println("✓ Déconnecté du serveur");
+            if (connected && output != null) {
+                try {
+                    sendCommand("DISCONNECT");
+                } catch (IOException e) {
+                    // Ignorer si déjà déconnecté ou connexion fermée
+                }
             }
-        } catch (IOException e) {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    // Ignorer
+                }
+            }
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                    // Ignorer
+                }
+            }
+            if (socket != null && !socket.isClosed()) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    // Ignorer
+                }
+            }
+            connected = false;
+            System.out.println("✓ Déconnecté du serveur");
+        } catch (Exception e) {
             System.err.println("Erreur lors de la déconnexion: " + e.getMessage());
         }
     }
 
     private void sendCommand(String command) throws IOException {
+        if (!connected || output == null) {
+            throw new IOException("Non connecté au serveur");
+        }
         output.writeObject(command);
         output.flush();
     }
 
     @SuppressWarnings("unchecked")
     private <T> T readResponse() throws IOException, ClassNotFoundException {
-        String status = (String) input.readObject();
-        Object data = input.readObject();
+        try {
+            String status = (String) input.readObject();
+            Object data = input.readObject();
 
-        if ("ERROR".equals(status)) {
-            throw new RuntimeException((String) data);
+            if ("ERROR".equals(status)) {
+                throw new RuntimeException((String) data);
+            }
+            return (T) data;
+        } catch (java.net.SocketException e) {
+            connected = false;
+            throw new IOException("Connexion perdue avec le serveur", e);
+        } catch (EOFException e) {
+            connected = false;
+            throw new IOException("Connexion fermée par le serveur", e);
         }
-        return (T) data;
     }
 
     public boolean isConnected() {
@@ -107,6 +147,16 @@ public class NetworkClient {
             return readResponse();
         } catch (Exception e) {
             System.err.println("Erreur getSports: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Ville> getVilles() {
+        try {
+            sendCommand("GET_VILLES");
+            return readResponse();
+        } catch (Exception e) {
+            System.err.println("Erreur getVilles: " + e.getMessage());
             return new ArrayList<>();
         }
     }
