@@ -8,3 +8,4 @@ Client:
 - Password: admin123
 - Peut effectuer des réservations"# clubasma" 
 "# sama" 
+"# ASMAA-LA" 
