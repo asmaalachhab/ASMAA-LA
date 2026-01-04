@@ -82,8 +82,10 @@ public class DatabaseManager {
                 String hashedPassword = rs.getString("password");
 
                 // Vérifier le mot de passe (utilisez BCrypt en production)
-                if (PasswordUtil.verifyPassword(password, hashedPassword)) {
-                    return extractUserFromResultSet(rs);
+
+                    if (PasswordUtil.verifyPassword(password, hashedPassword, username)) {
+
+                        return extractUserFromResultSet(rs);
                 }
             }
         } catch (SQLException e) {
@@ -102,9 +104,13 @@ public class DatabaseManager {
 
         try (PreparedStatement stmt = getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, user.getUsername());
+
+            stmt.setString(3, PasswordUtil.hashPassword(user.getPassword(), user.getUsername()));
+
             stmt.setString(2, user.getEmail());
-            stmt.setString(3, PasswordUtil.hashPassword(user.getPassword()));
+            
+            stmt.setString(3, PasswordUtil.hashPassword(user.getPassword(), user.getUsername()));
+
             stmt.setString(4, user.getNom());
             stmt.setString(5, user.getPrenom());
             stmt.setString(6, user.getTelephone());

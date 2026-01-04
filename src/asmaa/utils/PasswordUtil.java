@@ -1,76 +1,55 @@
-// PasswordUtil.java
 package asmaa.utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * Utilitaire pour le hachage et la vérification des mots de passe
- * Utilise SHA-256 avec salt (en production, utilisez BCrypt)
+ * Utilitaire de gestion des mots de passe
+ * Algorithme : SHA-256 + salt externe
+ *
+ * ⚠️ Usage académique / projet universitaire
+ * En production réelle : BCrypt ou Argon2
  */
 public class PasswordUtil {
 
     private static final String ALGORITHM = "SHA-256";
-    private static final int SALT_LENGTH = 16;
 
     /**
-     * Hash un mot de passe avec un salt aléatoire
+     * Hash un mot de passe avec un salt fourni
+     *
+     * @param password mot de passe en clair
+     * @param salt valeur unique (email, username, id...)
+     * @return hash encodé en Base64
      */
-    public static String hashPassword(String password) {
+    public static String hashPassword(String password, String salt) {
         try {
-            // Générer un salt aléatoire
-            SecureRandom random = new SecureRandom();
-            byte[] salt = new byte[SALT_LENGTH];
-            random.nextBytes(salt);
+            MessageDigest messageDigest = MessageDigest.getInstance(ALGORITHM);
 
-            // Hasher le mot de passe avec le salt
-            MessageDigest md = MessageDigest.getInstance(ALGORITHM);
-            md.update(salt);
-            byte[] hashedPassword = md.digest(password.getBytes());
+            // Ajouter le salt
+            messageDigest.update(salt.getBytes());
 
-            // Combiner salt et hash
-            byte[] combined = new byte[salt.length + hashedPassword.length];
-            System.arraycopy(salt, 0, combined, 0, salt.length);
-            System.arraycopy(hashedPassword, 0, combined, salt.length, hashedPassword.length);
+            // Hasher le mot de passe
+            byte[] hashedBytes = messageDigest.digest(password.getBytes());
 
-            // Encoder en Base64
-            return Base64.getEncoder().encodeToString(combined);
+            // Retourner en Base64
+            return Base64.getEncoder().encodeToString(hashedBytes);
 
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Erreur de hachage", e);
+            throw new RuntimeException("Erreur lors du hachage du mot de passe", e);
         }
     }
 
     /**
-     * Vérifie si un mot de passe correspond au hash
+     * Vérifie si le mot de passe correspond au hash stocké
+     *
+     * @param password mot de passe saisi
+     * @param salt salt utilisé à l'inscription
+     * @param storedHash hash enregistré en base
+     * @return true si correct, false sinon
      */
-    public static boolean verifyPassword(String password, String storedHash) {
-        try {
-            // Décoder le hash stocké
-            byte[] combined = Base64.getDecoder().decode(storedHash);
-
-            // Extraire le salt
-            byte[] salt = new byte[SALT_LENGTH];
-            System.arraycopy(combined, 0, salt, 0, SALT_LENGTH);
-
-            // Hasher le mot de passe fourni avec le même salt
-            MessageDigest md = MessageDigest.getInstance(ALGORITHM);
-            md.update(salt);
-            byte[] hashedPassword = md.digest(password.getBytes());
-
-            // Comparer les hash
-            for (int i = 0; i < hashedPassword.length; i++) {
-                if (hashedPassword[i] != combined[SALT_LENGTH + i]) {
-                    return false;
-                }
-            }
-
-            return true;
-
-        } catch (Exception e) {
-            return false;
-        }
+    public static boolean verifyPassword(String password, String salt, String storedHash) {
+        String generatedHash = hashPassword(password, salt);
+        return generatedHash.equals(storedHash);
     }
 }
